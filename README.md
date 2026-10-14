@@ -38,4 +38,4 @@ The main trade-off here is normalization versus duplication. Embedding `title`, 
    npm run seed
    ```
 
-The seed script clears existing `Book` and `Genre` documents, inserts at least four genres, and adds fifteen realistic book records that reference those genres.
+The seed script clears existing `Book` and `Genre` documents, inserts at least four genres, and adds fifteen realistic book records that reference those genres. It also ensures each seeded book keeps `availableCopies` at or below `totalCopies` so the inventory data stays internally consistent.

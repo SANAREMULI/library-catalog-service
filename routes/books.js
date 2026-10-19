@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
+const { requireAuth, requireRole } = require('../middleware/auth');
 const { validateBook, createHttpError } = require('../middleware/validate');
 
 router.get('/', async (req, res, next) => {
@@ -62,7 +63,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.post('/', validateBook, async (req, res, next) => {
+router.post('/', requireAuth, requireRole('librarian'), validateBook, async (req, res, next) => {
   try {
     const book = await Book.create(req.body);
     const populatedBook = await book.populate('genre', 'name slug');
@@ -75,7 +76,7 @@ router.post('/', validateBook, async (req, res, next) => {
   }
 });
 
-router.put('/:id', validateBook, async (req, res, next) => {
+router.put('/:id', requireAuth, requireRole('librarian'), validateBook, async (req, res, next) => {
   try {
     const book = await Book.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -98,7 +99,7 @@ router.put('/:id', validateBook, async (req, res, next) => {
   }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', requireAuth, requireRole('librarian'), async (req, res, next) => {
   try {
     const book = await Book.findByIdAndDelete(req.params.id);
 

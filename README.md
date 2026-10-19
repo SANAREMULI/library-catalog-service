@@ -40,6 +40,20 @@ The main trade-off here is normalization versus duplication. Embedding `title`, 
 
 The seed script clears existing `Book` and `Genre` documents, inserts at least four genres, and adds fifteen realistic book records that reference those genres. It also ensures each seeded book keeps `availableCopies` at or below `totalCopies` so the inventory data stays internally consistent.
 
+## Authentication and Authorization
+
+The library API now supports account registration, login, logout, and protected mutating routes for librarians. The seeded librarian test account is:
+
+- Username: `librarian`
+- Email: `librarian@library.test`
+- Password: `LibraryPass123!`
+
+This account is intentionally created once during seeding and is the credential used to test protected routes such as creating, updating, and deleting books.
+
+### Token Storage
+
+The API stores the JWT in an `httpOnly` cookie named `token` instead of `localStorage` or browser memory. This is a stronger default for application security because the browser will not expose the token to JavaScript, which reduces the impact of common XSS attacks. The trade-off is that it requires careful CSRF protection and a bit more server-side handling for browser requests, while `localStorage` is simpler to implement but more vulnerable to client-side scripts. For a library application with a server-controlled API, the cookie approach is the safer default because the token is kept out of client-side script access and can be cleared on logout without leaving stale credentials behind.
+
 ## API Endpoints
 
 ### Genre routes

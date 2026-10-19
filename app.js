@@ -1,11 +1,17 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const app = express();
 
 const genreRoutes = require('./routes/genres');
 const bookRoutes = require('./routes/books');
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
 
 app.use(express.json());
+app.use(cookieParser());
 
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/genres', genreRoutes);
 app.use('/books', bookRoutes);
 

@@ -3,6 +3,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Genre = require('./models/Genre');
 const Book = require('./models/Book');
+const User = require('./models/User');
 
 const genreSeeds = [
   { name: 'Science Fiction', slug: 'science-fiction' },
@@ -189,7 +190,16 @@ async function seedDatabase() {
 
   await Book.insertMany(booksToInsert);
 
+  await User.deleteMany({ role: 'librarian' });
+  const librarian = await User.create({
+    username: 'librarian',
+    email: 'librarian@library.test',
+    password: 'LibraryPass123!',
+    role: 'librarian',
+  });
+
   console.log(`Seeded ${insertedGenres.length} genres and ${booksToInsert.length} books`);
+  console.log(`Seeded librarian user: ${librarian.email} with password "LibraryPass123!"`);
 
   await mongoose.disconnect();
 }

@@ -1,10 +1,80 @@
 {
   "info": {
     "name": "Library Catalog API",
-    "description": "Endpoints for managing books and genres with validation and filtering support.",
+    "description": "Endpoints for managing books, genres, authentication, and profile access.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /api/auth/register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newpatron\",\n  \"email\": \"newpatron@example.com\",\n  \"password\": \"SecurePass123\",\n  \"role\": \"patron\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/auth/login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"librarian@library.test\",\n  \"password\": \"LibraryPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /api/users/profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Genres",
       "item": [
@@ -38,9 +108,7 @@
           "name": "POST /genres",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Historical Fiction\",\n  \"slug\": \"historical-fiction\"\n}"
@@ -57,9 +125,7 @@
           "name": "PUT /genres/:id",
           "request": {
             "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Historical Fiction Updated\",\n  \"slug\": \"historical-fiction-updated\"\n}"
@@ -123,12 +189,10 @@
           "response": []
         },
         {
-          "name": "POST /books",
+          "name": "POST /books (librarian required)",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"The Martian\",\n  \"author\": \"Andy Weir\",\n  \"isbn\": \"9780804139021\",\n  \"description\": \"An astronaut must survive alone on Mars.\",\n  \"coverImage\": \"https://example.com/martian.jpg\",\n  \"totalCopies\": 12,\n  \"availableCopies\": 8,\n  \"genre\": \"{{genreId}}\"\n}"
@@ -142,12 +206,10 @@
           "response": []
         },
         {
-          "name": "PUT /books/:id",
+          "name": "PUT /books/:id (librarian required)",
           "request": {
             "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"The Martian updated\",\n  \"author\": \"Andy Weir\",\n  \"isbn\": \"9780804139021\",\n  \"description\": \"Updated summary\",\n  \"coverImage\": \"https://example.com/martian.jpg\",\n  \"totalCopies\": 12,\n  \"availableCopies\": 9,\n  \"genre\": \"{{genreId}}\"\n}"
@@ -161,7 +223,7 @@
           "response": []
         },
         {
-          "name": "DELETE /books/:id",
+          "name": "DELETE /books/:id (librarian required)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -177,9 +239,7 @@
           "name": "POST /books invalid payload (400)",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"author\": \"Missing title\"\n}"
@@ -195,9 +255,7 @@
               "name": "400 validation error",
               "originalRequest": {
                 "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"author\": \"Missing title\"\n}"

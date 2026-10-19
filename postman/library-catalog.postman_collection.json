@@ -1,0 +1,225 @@
+{
+  "info": {
+    "name": "Library Catalog API",
+    "description": "Endpoints for managing books and genres with validation and filtering support.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Genres",
+      "item": [
+        {
+          "name": "GET /genres",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/genres",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /genres/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/genres/{{genreId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres", "{{genreId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /genres",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Historical Fiction\",\n  \"slug\": \"historical-fiction\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/genres",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /genres/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Historical Fiction Updated\",\n  \"slug\": \"historical-fiction-updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/genres/{{genreId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres", "{{genreId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /genres/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/genres/{{genreId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["genres", "{{genreId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "GET /books",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books?genre={{genreId}}&search=dune&page=1&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"],
+              "query": [
+                { "key": "genre", "value": "{{genreId}}" },
+                { "key": "search", "value": "dune" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "5" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /books/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/{{bookId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "{{bookId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /books",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Martian\",\n  \"author\": \"Andy Weir\",\n  \"isbn\": \"9780804139021\",\n  \"description\": \"An astronaut must survive alone on Mars.\",\n  \"coverImage\": \"https://example.com/martian.jpg\",\n  \"totalCopies\": 12,\n  \"availableCopies\": 8,\n  \"genre\": \"{{genreId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /books/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Martian updated\",\n  \"author\": \"Andy Weir\",\n  \"isbn\": \"9780804139021\",\n  \"description\": \"Updated summary\",\n  \"coverImage\": \"https://example.com/martian.jpg\",\n  \"totalCopies\": 12,\n  \"availableCopies\": 9,\n  \"genre\": \"{{genreId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/books/{{bookId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "{{bookId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /books/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/{{bookId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "{{bookId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /books invalid payload (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"author\": \"Missing title\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            }
+          },
+          "response": [
+            {
+              "name": "400 validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"author\": \"Missing title\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/books",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["books"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"error\": \"title is required\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "genreId", "value": "" },
+    { "key": "bookId", "value": "" }
+  ]
+}

@@ -39,3 +39,46 @@ The main trade-off here is normalization versus duplication. Embedding `title`, 
    ```
 
 The seed script clears existing `Book` and `Genre` documents, inserts at least four genres, and adds fifteen realistic book records that reference those genres. It also ensures each seeded book keeps `availableCopies` at or below `totalCopies` so the inventory data stays internally consistent.
+
+## API Endpoints
+
+### Genre routes
+
+- `GET /genres` — returns all genres
+- `GET /genres/:id` — returns one genre by id, or `404` when not found
+- `POST /genres` — creates a new genre; requires `name` and `slug`
+- `PUT /genres/:id` — updates a genre by id
+- `DELETE /genres/:id` — deletes a genre only when no books currently reference it; otherwise it returns `400` to protect data integrity
+
+### Book routes
+
+- `GET /books` — returns books with optional filters and pagination
+  - `?genre=<genreId>`: only books in that genre
+  - `?search=<text>`: case-insensitive match against `title` or `author`
+  - `?page=<n>&limit=<n>`: paginated results with `total`, `page`, `limit`, and `totalPages`
+- `GET /books/:id` — returns one book by id
+- `POST /books` — creates a book and validates input fields
+- `PUT /books/:id` — updates a book and validates input fields
+- `DELETE /books/:id` — deletes a book by id
+
+### Validation behavior
+
+The API validates required fields and type constraints before creating or updating data. Invalid payloads return JSON error responses with HTTP status `400` and a clear field-specific message instead of raw Mongoose validation errors.
+
+### Running the API
+
+1. Copy `.env.example` to `.env` and set `MONGODB_URI` to your MongoDB connection string.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Seed the database:
+   ```bash
+   npm run seed
+   ```
+4. Start the API server:
+   ```bash
+   npm start
+   ```
+
+The API listens on port `3000` by default and exposes the JSON endpoints above for the catalog service.

@@ -1,6 +1,6 @@
 # library-catalog-service
 
-This project models a simple library catalog in MongoDB with a `Genre` collection and a `Book` collection. The design keeps book metadata clean while allowing genres to be reused across many titles.
+This project provides the MongoDB library catalog API plus the Week 6 borrow-request and space-booking workflows. It uses separate `Genre`, `Book`, `User`, `BorrowRequest`, and `Booking` collections; genres and users/books are linked by references.
 
 ## Schema Design
 
@@ -28,7 +28,7 @@ The main trade-off here is normalization versus duplication. Embedding `title`, 
 
 ## Getting Started
 
-1. Copy `.env.example` to `.env` and set `MONGODB_URI` to your MongoDB connection string.
+1. Copy `.env.example` to `.env` and set `MONGODB_URI` to your MongoDB connection string. Set a private `JWT_SECRET`, `FRONTEND_ORIGINS`, `LOAN_DAYS`, and `FINE_PER_DAY` too.
 2. Install dependencies:
    ```bash
    npm install
@@ -38,7 +38,9 @@ The main trade-off here is normalization versus duplication. Embedding `title`, 
    npm run seed
    ```
 
-The seed script clears existing `Book` and `Genre` documents, inserts at least four genres, and adds fifteen realistic book records that reference those genres. It also ensures each seeded book keeps `availableCopies` at or below `totalCopies` so the inventory data stays internally consistent.
+The seed script clears existing `Book` and `Genre` documents, inserts at least four genres, and adds fifteen realistic book records that reference those genres. It also ensures each seeded book keeps `availableCopies` at or below `totalCopies` so the inventory data stays internally consistent. It seeds a librarian test account too, and should only be rerun when resetting the sample catalog is intended.
+
+For Week 6, set `JWT_SECRET` to a private random value and add `PORT`, `FRONTEND_ORIGINS`, `LOAN_DAYS`, and `FINE_PER_DAY` from `.env.example` to `.env`. Restart the server after changing environment settings. Keep `.env` private.
 
 ## Authentication and Authorization
 
@@ -48,7 +50,7 @@ The library API now supports account registration, login, logout, and protected 
 - Email: `librarian@library.test`
 - Password: `LibraryPass123!`
 
-This account is intentionally created once during seeding and is the credential used to test protected routes such as creating, updating, and deleting books.
+This account is intentionally created during seeding and is the credential used to test librarian-only operations such as creating, updating, and deleting books. The seed clears the current book and genre collections before restoring the sample data.
 
 ### Token Storage
 
@@ -96,3 +98,34 @@ The API validates required fields and type constraints before creating or updati
    ```
 
 The API listens on port `3000` by default and exposes the JSON endpoints above for the catalog service.
+
+5. Run `npm test` for the Week 6 fine and booking-overlap rule checks. `npm run seed` clears the current book and genre collections and recreates the sample data and librarian account; do not run it if you want to keep those records. To safely promote an existing user without resetting sample data, run `npm run promote:librarian` and enter that account's email.
+
+## Week 6: Borrow requests and space bookings
+
+Install the current dependencies, copy the new `FRONTEND_ORIGINS`, `LOAN_DAYS`, and `FINE_PER_DAY` values from `.env.example` into `.env`, then restart the API. `FRONTEND_ORIGINS` is a comma-separated allowlist for the Vite app. `LOAN_DAYS` defaults to 14 and `FINE_PER_DAY` defaults to 0.25.
+
+### Borrow requests
+
+- `POST /api/borrow-requests` requires a logged-in patron and a JSON body such as `{ "bookId": "<book id>" }`. The signed-in patron is read from the auth cookie, never from a client-supplied user id.
+- The service atomically decrements `availableCopies` only if a copy is still available. If it is zero, the API responds with HTTP 409. If creating the request fails after reserving a copy, the service restores that copy.
+- `GET /api/borrow-requests` is librarian-only and returns current requests with populated book and patron details.
+- `PATCH /api/borrow-requests/:id` is librarian-only. Send `{ "status": "returned" }` to mark it returned. Other accepted statuses are `pending`, `approved`, and `late`. A client-sent `fine` is ignored.
+
+### Fine rule
+
+When a librarian changes a request to `returned`, the server compares the UTC calendar date of `returnedAt` with `dueAt`. The fine is `$0.25 per calendar day late`, never below `$0.00`, rounded to cents: `max(0, late calendar days) × FINE_PER_DAY`. For example, two days late is `$0.50`. The server sets `returnedAt` and computes the fine; the browser cannot choose either value. A returned copy is added back to inventory.
+
+### Space bookings
+
+- `POST /api/bookings` requires a logged-in patron and `{ "space": "Reading Room", "date": "YYYY-MM-DD", "startTime": "HH:mm", "endTime": "HH:mm" }`.
+- Before creating a booking, the server checks existing records with the same space and date. It rejects when `newStart < existingEnd && newEnd > existingStart`. This catches partial overlaps and bookings contained inside a larger booking. Adjacent times (one ending at 10:00 and another starting at 10:00) are allowed.
+- `GET /api/bookings` returns all bookings to librarians only.
+
+The overlap check is performed by the API, not just by the form. It is suitable for the course assignment; a busy production service should additionally serialize simultaneous check-and-insert operations with a MongoDB transaction or lock.
+
+### Testing and permissions
+
+Run the business-rule checks with `npm test`. They cover late fine rounding, partial and contained booking overlaps, adjacent time slots, and invalid time ranges. Borrow request status changes, admin listings, and book mutations return HTTP 401 when unauthenticated and HTTP 403 for authenticated non-librarians. Public registration always creates a patron; use the seeded librarian account above or promote a user with `npm run promote:librarian` to open admin pages.
+
+On the frontend, sign in with the seeded librarian account (`librarian@library.test` / `LibraryPass123!`) and open `/admin/books`, `/admin/borrow-requests`, or `/admin/bookings`. For a demo, request a book as a patron, then sign in as the librarian and mark it returned. To demonstrate booking conflicts, submit the same space/date with a time range intersecting an existing booking.

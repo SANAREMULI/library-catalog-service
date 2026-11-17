@@ -1,19 +1,32 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const app = express();
 
 const genreRoutes = require('./routes/genres');
 const bookRoutes = require('./routes/books');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const borrowRequestRoutes = require('./routes/borrowRequests');
+const bookingRoutes = require('./routes/bookings');
 
+const allowedOrigins = (process.env.FRONTEND_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/genres', genreRoutes);
+app.use('/api/genres', genreRoutes);
 app.use('/books', bookRoutes);
+app.use('/api/books', bookRoutes);
+app.use('/api/borrow-requests', borrowRequestRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Book = require('../models/Book');
+const Genre = require('../models/Genre');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { validateBook, createHttpError } = require('../middleware/validate');
 
@@ -10,18 +12,26 @@ router.get('/', async (req, res, next) => {
     const filter = {};
 
     if (genre) {
-      filter.genre = genre;
+      if (mongoose.Types.ObjectId.isValid(genre)) {
+        filter.genre = genre;
+      } else {
+        const genreRecord = await Genre.findOne({
+          $or: [{ name: new RegExp(`^${String(genre).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }, { slug: String(genre).toLowerCase() }],
+        });
+        filter.genre = genreRecord ? genreRecord._id : new mongoose.Types.ObjectId();
+      }
     }
 
     if (search) {
+      const safeSearch = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { author: { $regex: search, $options: 'i' } },
+        { title: { $regex: safeSearch, $options: 'i' } },
+        { author: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
     const safePage = Math.max(1, Number(page) || 1);
-    const safeLimit = Math.max(1, Number(limit) || 10);
+    const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
 
     const [books, total] = await Promise.all([
       Book.find(filter)

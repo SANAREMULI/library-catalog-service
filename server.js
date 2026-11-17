@@ -11,6 +11,11 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'replace-with-a-long-random-secret') {
+  console.error('JWT_SECRET is not configured. Set a private random secret in your .env file.');
+  process.exit(1);
+}
+
 mongoose
   .connect(MONGODB_URI)
   .then(() => {

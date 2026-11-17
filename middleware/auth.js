@@ -15,7 +15,7 @@ const requireAuth = async (req, res, next) => {
       return next(createHttpError(401, 'Authentication required'));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {

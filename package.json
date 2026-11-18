@@ -6,8 +6,11 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js",
-    "test": "node --test",
+    "test": "jest __tests__ --runInBand",
     "promote:librarian": "node scripts/promoteLibrarian.js"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   },
   "dependencies": {
     "bcryptjs": "^3.0.0",
